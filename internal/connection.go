@@ -129,12 +129,7 @@ func (cm *ConnectionManager) Reader() {
 		b, internal := bytes.CutPrefix(data, []byte(PeerMagic))
 		if internal && len(b) > 0 {
 			switch b[0] {
-			case PeerKeepAlive, PeerKeepAliveAck:
-				if b[0] == PeerKeepAliveAck {
-					// nothing to do
-					continue
-				}
-
+			case PeerKeepAlive:
 				peer, err := cm.GetPeerByAddr(addr)
 				if err != nil {
 					// TODO: log this
@@ -149,6 +144,9 @@ func (cm *ConnectionManager) Reader() {
 					continue
 				}
 
+				continue
+			case PeerKeepAliveAck:
+				// nothing to do
 				continue
 			case PeerDisconnect:
 				peer, err := cm.GetPeerByAddr(addr)
