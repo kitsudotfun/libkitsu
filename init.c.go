@@ -10,23 +10,26 @@ import (
 import "C"
 
 //export KtInit
-func KtInit(game *C.char, key *C.char) C.bool {
-	err := IKtInit(C.GoString(game), C.GoString(key))
+func KtInit(game *C.char, key *C.char) *C.char {
+	id, err := IKtInit(C.GoString(game), C.GoString(key))
 	if err != nil {
 		LastErr = err
-		return false
+		return nil
 	}
 
-	return true
+	return C.CString(id.String())
 }
 
 //export GMS_KtInit
-func GMS_KtInit(game *C.char, key *C.char) C.double {
-	err := IKtInit(C.GoString(game), C.GoString(key))
+func GMS_KtInit(game *C.char, key *C.char) *C.char {
+	id, err := IKtInit(C.GoString(game), C.GoString(key))
 	if err != nil {
 		LastErr = err
-		return 0
+		return nil
 	}
 
-	return 1
+	str := C.CString(id.String())
+	LastString = str
+
+	return str
 }
