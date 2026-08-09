@@ -7,11 +7,9 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"io"
 	"math"
 	"math/bits"
 	"net/http"
-	"os"
 	"runtime"
 	"slices"
 	"sync"
@@ -46,7 +44,6 @@ func apiCall[reqT any, resT any](endpoint string, auth string, req reqT, res *re
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		io.Copy(os.Stdout, resp.Body)
 		return ErrNonOkStatus
 	}
 
