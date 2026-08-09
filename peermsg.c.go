@@ -89,8 +89,8 @@ func KtPeerMsgRecv(id *C.char, blocking C.bool, dst *C.char, dstLen C.int) C.int
 }
 
 //export GMS_KtPeerMsgRecv
-func GMS_KtPeerMsgRecv(id *C.char, blocking C.bool) *C.char {
-	s, err := IKtPeerMsgRecv(C.GoString(id), blocking == true)
+func GMS_KtPeerMsgRecv(id *C.char, blocking C.double) *C.char {
+	s, err := IKtPeerMsgRecv(C.GoString(id), blocking != 0)
 	if err != nil {
 		LastError = err
 		return nil
