@@ -85,8 +85,6 @@ func (cm *ConnectionManager) Shutdown() error {
 
 func (cm *ConnectionManager) KeepAliveSender() {
 	ticker := time.NewTicker(time.Second * 30)
-	defer ticker.Stop()
-
 	for {
 		<-ticker.C
 		err := natnegCall(KeepAlive, KeepAliveRequest{}, &KeepAliveResponse{})

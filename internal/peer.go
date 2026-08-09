@@ -146,12 +146,12 @@ func (p *Peer) Connect() error {
 
 	packetType := PeerConnect
 	for {
-		timeout := time.NewTimer(time.Second)
-
 		err := p.Send(append([]byte(PeerMagic), packetType))
 		if err != nil {
 			return err
 		}
+
+		timeout := time.NewTimer(time.Second)
 
 		if p.State == Connected {
 			// PeerConnectAck sent, break now
@@ -195,8 +195,6 @@ func (p *Peer) Connect() error {
 // like ConnectionManager KeepAliveSender but for the Peer connection
 func (p *Peer) KeepAliveSender() {
 	ticker := time.NewTicker(time.Second * 30)
-	defer ticker.Stop()
-
 	for {
 		<-ticker.C
 		err := p.Send(append([]byte(PeerMagic), PeerKeepAlive))
