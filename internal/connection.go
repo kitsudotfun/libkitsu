@@ -107,7 +107,8 @@ func (cm *ConnectionManager) Reader() {
 		data := buf[:n]
 
 		// NATNEG message
-		if addr == cm.natnegAddr {
+		b, natneg := bytes.CutPrefix(data, []byte(NatnegMagic))
+		if natneg && addr == cm.natnegAddr {
 			if len(data) > 0 && data[0] == JoinNotify {
 				err = cm.handleJoinNotify(data[1:])
 				if err != nil {

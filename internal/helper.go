@@ -59,6 +59,7 @@ func apiCall[reqT any, resT any](endpoint string, auth string, req reqT, res *re
 
 func natnegCall[reqT any, resT any](packetType byte, req reqT, res *resT) error {
 	var buf bytes.Buffer
+	buf.WriteString(NatnegMagic)
 	buf.WriteByte(packetType)
 	err := json.NewEncoder(&buf).Encode(req)
 	if err != nil {
