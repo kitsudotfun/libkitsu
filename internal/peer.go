@@ -146,7 +146,7 @@ func (p *Peer) Connect() error {
 
 	packetType := PeerConnect
 	for {
-		timeout := time.NewTimer(time.Second * 3)
+		timeout := time.NewTimer(time.Second)
 
 		err := p.Send(append([]byte(PeerMagic), packetType))
 		if err != nil {
@@ -158,27 +158,26 @@ func (p *Peer) Connect() error {
 			break
 		}
 
-		var recv []byte
+		var data []byte
 		select {
-		case in := <-p.inbox:
-			recv = in
+		case data = <-p.inbox:
 		case <-timeout.C:
 			// do nothing, will be handled by prefix check
 		}
 
 		var found bool
-		recv, found = bytes.CutPrefix(recv, []byte(PeerMagic))
+		data, found = bytes.CutPrefix(data, []byte(PeerMagic))
 		if !found {
 			// unexpected
 			continue
 		}
 
-		if len(recv) < 1 {
+		if len(data) < 1 {
 			// unexpected
 			continue
 		}
 
-		switch recv[0] {
+		switch data[0] {
 		case PeerConnect:
 			p.State = ConnectingAck
 			packetType = PeerConnectAck

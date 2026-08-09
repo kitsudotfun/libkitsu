@@ -13,12 +13,14 @@ import (
 	"runtime"
 	"slices"
 	"sync"
+	"time"
 
 	. "github.com/kitsudotfun/natneg/defs"
 )
 
 var (
 	ErrUnexpectedResponse = errors.New("unexpected response")
+	ErrTimedOut           = errors.New("timed out")
 )
 
 const apiUrl = "https://kyuubi.kitsu.fun/dev"
@@ -71,7 +73,14 @@ func natnegCall[reqT any, resT any](packetType byte, req reqT, res *resT) error 
 		return err
 	}
 
-	data := <-cm.natnegInbox
+	timeout := time.NewTimer(time.Second * 3)
+
+	var data []byte
+	select {
+	case data = <-cm.natnegInbox:
+	case <-timeout.C:
+		return ErrTimedOut
+	}
 
 	if data[0] != packetType {
 		return ErrUnexpectedResponse
