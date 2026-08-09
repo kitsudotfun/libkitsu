@@ -14,6 +14,7 @@ var (
 	ErrPeerUnknown           = errors.New("peer unknown")
 	ErrPeerExists            = errors.New("peer exists")
 	ErrPeerAlreadyConnecting = errors.New("peer already connecting")
+	ErrPeerInboxFull         = errors.New("peer inbox full")
 )
 
 const PeerMagic = "KTsu"
@@ -64,7 +65,7 @@ func (cm *ConnectionManager) AddPeer(id SessionID, addr netip.AddrPort) error {
 		return ErrPeerExists
 	}
 
-	peer := Peer{cm: cm, ID: id, addr: addr, inbox: make(chan []byte)}
+	peer := Peer{cm: cm, ID: id, addr: addr, inbox: make(chan []byte, 32)}
 
 	// add to peers so AddPeerMessage can write into its inbox
 	cm.peers = append(cm.peers, &peer)
@@ -103,6 +104,12 @@ func (cm *ConnectionManager) AddPeerMessage(addr netip.AddrPort, msg []byte) err
 	for _, peer := range cm.peers {
 		if peer.addr != addr {
 			continue
+		}
+
+		select {
+		case peer.inbox <- msg:
+		default:
+			return ErrPeerInboxFull
 		}
 
 		peer.inbox <- msg
