@@ -49,7 +49,7 @@ func IKtPeerMsgSendAll(msg []byte) error {
 	return nil
 }
 
-func IKtPeerMsgRecv(id string) ([]byte, error) {
+func IKtPeerMsgRecv(id string, blocking bool) ([]byte, error) {
 	var sid SessionID
 	err := sid.FromString(id)
 	if err != nil {
@@ -64,5 +64,5 @@ func IKtPeerMsgRecv(id string) ([]byte, error) {
 		return nil, ErrPeerNotConnected
 	}
 
-	return peer.Receive(), nil
+	return peer.Receive(blocking), nil
 }

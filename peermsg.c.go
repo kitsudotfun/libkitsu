@@ -71,8 +71,8 @@ func GMS_KtPeerMsgSendAll(msg *C.char) C.double {
 }
 
 //export KtPeerMsgRecv
-func KtPeerMsgRecv(id *C.char, dst *C.char, dstLen C.int) C.int {
-	s, err := IKtPeerMsgRecv(C.GoString(id))
+func KtPeerMsgRecv(id *C.char, blocking C.bool, dst *C.char, dstLen C.int) C.int {
+	s, err := IKtPeerMsgRecv(C.GoString(id), blocking == true)
 	if err != nil {
 		LastError = err
 		return -1
@@ -89,8 +89,8 @@ func KtPeerMsgRecv(id *C.char, dst *C.char, dstLen C.int) C.int {
 }
 
 //export GMS_KtPeerMsgRecv
-func GMS_KtPeerMsgRecv(id *C.char) *C.char {
-	s, err := IKtPeerMsgRecv(C.GoString(id))
+func GMS_KtPeerMsgRecv(id *C.char, blocking C.bool) *C.char {
+	s, err := IKtPeerMsgRecv(C.GoString(id), blocking == true)
 	if err != nil {
 		LastError = err
 		return nil

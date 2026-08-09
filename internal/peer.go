@@ -216,8 +216,18 @@ func (p *Peer) Send(b []byte) error {
 	return nil
 }
 
-func (p *Peer) Receive() []byte {
-	return <-p.inbox
+func (p *Peer) Receive(blocking bool) []byte {
+	if blocking {
+		return <-p.inbox
+	}
+
+	select {
+	case msg := <-p.inbox:
+		return msg
+	default:
+	}
+
+	return nil
 }
 
 func IKtPeerDisconnect(id string) error {
