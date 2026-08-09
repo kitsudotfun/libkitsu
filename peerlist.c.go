@@ -31,7 +31,7 @@ func KtPeerList(count *C.int) *C.KtPeerListItem {
 
 	ptr := C.malloc(C.size_t(len(peers)) * C.size_t(unsafe.Sizeof(C.KtPeerListItem{})))
 	if ptr == nil {
-		LastErr = ErrMallocFailed
+		LastError = ErrMallocFailed
 		*count = -1
 		return nil
 	}

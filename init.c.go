@@ -13,7 +13,7 @@ import "C"
 func KtInit(game *C.char, key *C.char) *C.char {
 	id, err := IKtInit(C.GoString(game), C.GoString(key))
 	if err != nil {
-		LastErr = err
+		LastError = err
 		return nil
 	}
 
@@ -24,7 +24,7 @@ func KtInit(game *C.char, key *C.char) *C.char {
 func GMS_KtInit(game *C.char, key *C.char) *C.char {
 	id, err := IKtInit(C.GoString(game), C.GoString(key))
 	if err != nil {
-		LastErr = err
+		LastError = err
 		return nil
 	}
 
