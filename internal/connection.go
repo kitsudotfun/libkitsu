@@ -32,7 +32,7 @@ func (cm *ConnectionManager) Init(natnegAddr string) error {
 	if err != nil {
 		return err
 	}
-	addrs, err := net.DefaultResolver.LookupNetIP(context.TODO(), "ip4", host)
+	addrs, err := net.DefaultResolver.LookupNetIP(context.Background(), "ip4", host)
 	if err != nil {
 		return err
 	}
@@ -107,8 +107,8 @@ func (cm *ConnectionManager) Reader() {
 		// NATNEG message
 		b, natneg := bytes.CutPrefix(data, []byte(NatnegMagic))
 		if natneg && addr == cm.natnegAddr {
-			if len(data) > 0 && data[0] == JoinNotify {
-				err = cm.handleJoinNotify(data[1:])
+			if len(b) > 0 && b[0] == JoinNotify {
+				err = cm.handleJoinNotify(b[1:])
 				if err != nil {
 					// TODO: log this
 					continue
@@ -118,7 +118,7 @@ func (cm *ConnectionManager) Reader() {
 			}
 
 			// this is a response that natnegCall is waiting on
-			cm.natnegInbox <- data
+			cm.natnegInbox <- b
 			continue
 		}
 
