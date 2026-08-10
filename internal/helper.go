@@ -7,6 +7,8 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"math"
 	"math/bits"
 	"net/http"
@@ -46,7 +48,8 @@ func apiCall[reqT any, resT any](endpoint string, auth string, req reqT, res *re
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return ErrNonOkStatus
+		b, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("%w: %s", ErrNonOkStatus, b)
 	}
 
 	defer resp.Body.Close()
