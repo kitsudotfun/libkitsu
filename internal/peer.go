@@ -51,10 +51,6 @@ type Peer struct {
 	lastKeepAlive time.Time
 }
 
-func GetPeers() []*Peer {
-	return cm.peers
-}
-
 // add a Peer to the ConnectionManager and connects to them
 func (cm *ConnectionManager) AddPeer(id SessionID, addr netip.AddrPort) error {
 	for _, peer := range cm.peers {

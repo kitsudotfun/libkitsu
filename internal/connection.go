@@ -4,12 +4,17 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net"
 	"net/netip"
 	"strconv"
 	"time"
 
 	. "github.com/kitsudotfun/natneg/defs"
+)
+
+var (
+	ErrNotInitialized = errors.New("not initialized")
 )
 
 type ConnectionManager struct {
@@ -184,4 +189,16 @@ func (cm *ConnectionManager) handleJoinNotify(data []byte) error {
 	}
 
 	return nil
+}
+
+func (cm *ConnectionManager) GetPeers() []*Peer {
+	return cm.peers
+}
+
+func GetCM() (*ConnectionManager, error) {
+	if cm.conn == nil {
+		return nil, ErrNotInitialized
+	}
+
+	return &cm, nil
 }

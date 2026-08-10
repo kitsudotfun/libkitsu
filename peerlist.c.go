@@ -22,7 +22,13 @@ import "C"
 
 //export KtPeerList
 func KtPeerList(count *C.int) *C.KtPeerListItem {
-	peers := GetPeers()
+	cm, err := GetCM()
+	if err != nil {
+		*count = -1
+		return nil
+	}
+
+	peers := cm.GetPeers()
 
 	if len(peers) == 0 {
 		*count = 0
@@ -54,8 +60,14 @@ func GMS_KtPeerList() *C.char {
 		State int       `json:"state"`
 	}
 
+	cm, err := GetCM()
+	if err != nil {
+		LastError = err
+		return nil
+	}
+
 	var peers []PeerInfo
-	for _, peer := range GetPeers() {
+	for _, peer := range cm.GetPeers() {
 		peers = append(peers, PeerInfo{ID: peer.ID, State: peer.State})
 	}
 
