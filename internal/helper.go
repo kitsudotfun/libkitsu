@@ -71,6 +71,11 @@ func natnegCall[reqT any, resT any](packetType byte, req reqT, res *resT) error 
 		return err
 	}
 
+	cm, err := GetCM()
+	if err != nil {
+		return err
+	}
+
 	_, err = cm.conn.WriteToUDPAddrPort(buf.Bytes(), cm.natnegAddr)
 	if err != nil {
 		return err
