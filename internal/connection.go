@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net"
 	"net/netip"
+	"slices"
 	"strconv"
 	"time"
 
@@ -107,15 +108,14 @@ func (cm *ConnectionManager) Reader() {
 			break
 		}
 
-		data := buf[:n]
+		data := slices.Clone(buf[:n])
 
 		// NATNEG message
 		b, natneg := bytes.CutPrefix(data, []byte(NatnegMagic))
-		if natneg && addr == cm.natnegAddr {
-			if len(b) > 0 && b[0] == JoinNotify {
+		if natneg && addr == cm.natnegAddr && len(b) > 0 {
+			if b[0] == JoinNotify {
 				// TODO: handle error from this somehow
 				go cm.handleJoinNotify(b[1:])
-
 				continue
 			}
 
@@ -125,17 +125,17 @@ func (cm *ConnectionManager) Reader() {
 		}
 
 		// peer message
+		peer, err := cm.GetPeerByAddr(addr)
+		if err != nil {
+			// TODO: log this
+			continue
+		}
+
 		// check for internal message
 		b, internal := bytes.CutPrefix(data, []byte(PeerMagic))
 		if internal && len(b) > 0 {
 			switch b[0] {
 			case PeerKeepAlive:
-				peer, err := cm.GetPeerByAddr(addr)
-				if err != nil {
-					// TODO: log this
-					continue
-				}
-
 				peer.lastKeepAlive = time.Now()
 
 				var buf bytes.Buffer
@@ -152,12 +152,6 @@ func (cm *ConnectionManager) Reader() {
 				// nothing to do
 				continue
 			case PeerDisconnect:
-				peer, err := cm.GetPeerByAddr(addr)
-				if err != nil {
-					// TODO: log this
-					continue
-				}
-
 				err = cm.DeletePeer(peer.ID)
 				if err != nil {
 					// TODO: log this
@@ -166,9 +160,11 @@ func (cm *ConnectionManager) Reader() {
 
 				continue
 			}
+
+			// other internal messages should be received by AddMessage
 		}
 
-		err = cm.AddPeerMessage(addr, data)
+		err = peer.AddMessage(data)
 		if err != nil {
 			// TODO: log this
 			continue

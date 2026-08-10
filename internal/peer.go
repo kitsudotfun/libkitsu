@@ -99,26 +99,6 @@ func (cm *ConnectionManager) DeletePeer(id SessionID) error {
 	return ErrPeerUnknown
 }
 
-// add a received message from the Peer to its inbox
-func (cm *ConnectionManager) AddPeerMessage(addr netip.AddrPort, msg []byte) error {
-	for _, peer := range cm.peers {
-		if peer.addr != addr {
-			continue
-		}
-
-		select {
-		case peer.inbox <- msg:
-		default:
-			return ErrPeerInboxFull
-		}
-
-		peer.inbox <- msg
-		return nil
-	}
-
-	return ErrPeerUnknown
-}
-
 func (cm *ConnectionManager) GetPeerByID(id SessionID) (*Peer, error) {
 	for _, peer := range cm.peers {
 		if peer.ID != id {
@@ -141,6 +121,17 @@ func (cm *ConnectionManager) GetPeerByAddr(addr netip.AddrPort) (*Peer, error) {
 	}
 
 	return nil, ErrPeerUnknown
+}
+
+func (p *Peer) AddMessage(msg []byte) error {
+	select {
+	case p.inbox <- msg:
+	default:
+		return ErrPeerInboxFull
+	}
+
+	p.inbox <- msg
+	return nil
 }
 
 // establish a p2p connection to the Peer
