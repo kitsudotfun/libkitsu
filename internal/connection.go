@@ -2,13 +2,11 @@ package internal
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"net"
 	"net/netip"
 	"slices"
-	"strconv"
 	"time"
 
 	. "github.com/kitsudotfun/natneg/defs"
@@ -27,26 +25,12 @@ type ConnectionManager struct {
 	peers []*Peer
 }
 
-func (cm *ConnectionManager) Init(natnegAddr string) error {
+func (cm *ConnectionManager) Init() error {
 	var err error
 	cm.conn, err = net.ListenUDP("udp4", nil)
 	if err != nil {
 		return err
 	}
-
-	host, port, err := net.SplitHostPort(natnegAddr)
-	if err != nil {
-		return err
-	}
-	addrs, err := net.DefaultResolver.LookupNetIP(context.Background(), "ip4", host)
-	if err != nil {
-		return err
-	}
-	portInt, err := strconv.Atoi(port)
-	if err != nil {
-		return err
-	}
-	cm.natnegAddr = netip.AddrPortFrom(addrs[0], uint16(portInt))
 
 	go cm.Reader()
 

@@ -41,8 +41,8 @@ func IKtInit(game string, key string) (SessionID, error) {
 
 	sessionToken = verify.Token
 
-	cm = ConnectionManager{natnegInbox: make(chan []byte)}
-	err = cm.Init(verify.NatNegServer)
+	cm = ConnectionManager{natnegAddr: verify.NatNegAddr, natnegInbox: make(chan []byte)}
+	err = cm.Init()
 	if err != nil {
 		return SessionID{}, err
 	}
