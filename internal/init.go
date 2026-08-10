@@ -25,7 +25,7 @@ func IKtInit(game string, key string) (SessionID, error) {
 		return SessionID{}, err
 	}
 
-	proofKey, err := base64.RawStdEncoding.DecodeString(key)
+	proofKey, err := base64.StdEncoding.DecodeString(key)
 	if err != nil {
 		return SessionID{}, err
 	}

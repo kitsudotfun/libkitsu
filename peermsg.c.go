@@ -27,7 +27,7 @@ func KtPeerMsgSend(id *C.char, msg *C.char, msgLen C.int) C.bool {
 
 //export GMS_KtPeerMsgSend
 func GMS_KtPeerMsgSend(id *C.char, msg *C.char) C.double {
-	msgBytes, err := base64.RawStdEncoding.DecodeString(C.GoString(msg))
+	msgBytes, err := base64.StdEncoding.DecodeString(C.GoString(msg))
 	if err != nil {
 		LastError = err
 		return 0
@@ -55,7 +55,7 @@ func KtPeerMsgSendAll(msg *C.char, msgLen C.int) C.bool {
 
 //export GMS_KtPeerMsgSendAll
 func GMS_KtPeerMsgSendAll(msg *C.char) C.double {
-	msgBytes, err := base64.RawStdEncoding.DecodeString(C.GoString(msg))
+	msgBytes, err := base64.StdEncoding.DecodeString(C.GoString(msg))
 	if err != nil {
 		LastError = err
 		return 0
@@ -96,7 +96,7 @@ func GMS_KtPeerMsgRecv(id *C.char, blocking C.double) *C.char {
 		return nil
 	}
 
-	str := C.CString(base64.RawStdEncoding.EncodeToString(s))
+	str := C.CString(base64.StdEncoding.EncodeToString(s))
 	LastString = str
 
 	return str
