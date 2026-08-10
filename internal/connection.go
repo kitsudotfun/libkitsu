@@ -133,7 +133,10 @@ func (cm *ConnectionManager) Reader() {
 
 				peer.lastKeepAlive = time.Now()
 
-				err = peer.Send(append([]byte(PeerMagic), PeerKeepAliveAck))
+				var buf bytes.Buffer
+				buf.WriteString(PeerMagic)
+				buf.WriteByte(PeerKeepAliveAck)
+				err = peer.Send(buf.Bytes())
 				if err != nil {
 					// TODO: log this
 					continue

@@ -79,6 +79,10 @@ func (cm *ConnectionManager) AddPeer(id SessionID, addr netip.AddrPort) error {
 }
 
 func (cm *ConnectionManager) DeletePeer(id SessionID) error {
+	var buf bytes.Buffer
+	buf.WriteString(PeerMagic)
+	buf.WriteByte(PeerDisconnect)
+
 	for i, peer := range cm.peers {
 		if peer.ID != id {
 			continue
@@ -88,7 +92,7 @@ func (cm *ConnectionManager) DeletePeer(id SessionID) error {
 
 		close(peer.inbox)
 
-		err := peer.Send(append([]byte(PeerMagic), PeerDisconnect))
+		err := peer.Send(buf.Bytes())
 		if err != nil {
 			return err
 		}
@@ -153,7 +157,10 @@ func (p *Peer) Connect() error {
 
 	packetType := PeerConnect
 	for {
-		err := p.Send(append([]byte(PeerMagic), packetType))
+		var buf bytes.Buffer
+		buf.WriteString(PeerMagic)
+		buf.WriteByte(packetType)
+		err := p.Send(buf.Bytes())
 		if err != nil {
 			return err
 		}
@@ -202,9 +209,15 @@ func (p *Peer) Connect() error {
 // like ConnectionManager KeepAliveSender but for the Peer connection
 func (p *Peer) KeepAliveSender() {
 	ticker := time.NewTicker(time.Second * 30)
+
+	var buf bytes.Buffer
+	buf.WriteString(PeerMagic)
+	buf.WriteByte(PeerKeepAlive)
+
 	for {
 		<-ticker.C
-		err := p.Send(append([]byte(PeerMagic), PeerKeepAlive))
+
+		err := p.Send(buf.Bytes())
 		if err != nil {
 			break
 		}
