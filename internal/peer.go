@@ -207,6 +207,11 @@ func (p *Peer) keepAliveLoop() {
 		if err != nil {
 			break
 		}
+
+		// mark as timed out after a minute
+		if time.Since(p.lastKeepAlive) > time.Minute {
+			p.State = TimedOut
+		}
 	}
 }
 
