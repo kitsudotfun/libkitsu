@@ -6,10 +6,10 @@ import (
 	. "github.com/kitsudotfun/kyuubi/api/defs"
 )
 
-var ServerData *Server
+var serverData *Server
 
 func IKtServerAnnounce(server Server) error {
-	ServerData = &server
+	serverData = &server
 
 	err := sendHeartbeat()
 	if err != nil {
@@ -20,7 +20,7 @@ func IKtServerAnnounce(server Server) error {
 }
 
 func IKtServerShutdown() error {
-	ServerData = nil
+	serverData = nil
 
 	err := apiCall("/server/delete", sessionToken, ServerDeleteRequest{}, &ServerDeleteResponse{})
 	if err != nil {
@@ -28,7 +28,7 @@ func IKtServerShutdown() error {
 	}
 
 	for _, peer := range cm.peers {
-		err = cm.DeletePeer(peer.ID)
+		err = cm.deletePeer(peer.ID)
 		if err != nil {
 			return err
 		}
@@ -37,11 +37,9 @@ func IKtServerShutdown() error {
 	return nil
 }
 
-func HeartbeatSender() {
-	ticker := time.NewTicker(time.Minute * 4)
-	for {
-		<-ticker.C
-		if ServerData == nil {
+func heartbeatLoop() {
+	for range time.NewTicker(time.Minute * 5).C {
+		if serverData == nil {
 			continue
 		}
 
@@ -50,12 +48,12 @@ func HeartbeatSender() {
 }
 
 func sendHeartbeat() error {
-	if ServerData == nil {
+	if serverData == nil {
 		return nil
 	}
 
 	err := apiCall("/server/heartbeat", sessionToken, ServerHeartbeatRequest{
-		Server: *ServerData,
+		Server: *serverData,
 		Token:  attestToken,
 	}, &ServerHeartbeatResponse{})
 	if err != nil {

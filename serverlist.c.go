@@ -30,7 +30,7 @@ import "C"
 func KtServerList(count *C.int) *C.KtServerListItem {
 	list, err := IKtServerList()
 	if err != nil {
-		LastError = err
+		lastError = err
 		*count = -1
 		return nil
 	}
@@ -41,7 +41,7 @@ func KtServerList(count *C.int) *C.KtServerListItem {
 
 	ptr := C.malloc(C.size_t(len(list)) * C.size_t(unsafe.Sizeof(C.KtServerListItem{})))
 	if ptr == nil {
-		LastError = ErrMallocFailed
+		lastError = ErrMallocFailed
 		*count = -1
 		return nil
 	}
@@ -70,7 +70,7 @@ func KtServerList(count *C.int) *C.KtServerListItem {
 func GMS_KtServerList() *C.char {
 	list, err := IKtServerList()
 	if err != nil {
-		LastError = err
+		lastError = err
 		return nil
 	}
 	if len(list) == 0 {
@@ -80,7 +80,7 @@ func GMS_KtServerList() *C.char {
 	b, _ := json.Marshal(list)
 
 	str := C.CString(string(b))
-	LastString = str
+	lastString = str
 
 	return str
 }

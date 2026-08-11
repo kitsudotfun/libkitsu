@@ -13,7 +13,7 @@ import "C"
 func KtShutdown() C.bool {
 	err := IKtShutdown()
 	if err != nil {
-		LastError = err
+		lastError = err
 		return false
 	}
 
@@ -24,7 +24,7 @@ func KtShutdown() C.bool {
 func GMS_KtShutdown() C.double {
 	err := IKtShutdown()
 	if err != nil {
-		LastError = err
+		lastError = err
 		return 0
 	}
 

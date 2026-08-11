@@ -37,7 +37,7 @@ func KtPeerList(count *C.int) *C.KtPeerListItem {
 
 	ptr := C.malloc(C.size_t(len(peers)) * C.size_t(unsafe.Sizeof(C.KtPeerListItem{})))
 	if ptr == nil {
-		LastError = ErrMallocFailed
+		lastError = ErrMallocFailed
 		*count = -1
 		return nil
 	}
@@ -62,7 +62,7 @@ func GMS_KtPeerList() *C.char {
 
 	cm, err := GetCM()
 	if err != nil {
-		LastError = err
+		lastError = err
 		return nil
 	}
 
@@ -74,7 +74,7 @@ func GMS_KtPeerList() *C.char {
 	b, _ := json.Marshal(peers)
 
 	str := C.CString(string(b))
-	LastString = str
+	lastString = str
 
 	return str
 }

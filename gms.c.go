@@ -6,16 +6,16 @@ package main
 import "C"
 import "unsafe"
 
-var LastString *C.char
+var lastString *C.char
 
 //export GMS_KtFreeLastString
 func GMS_KtFreeLastString() C.double {
-	if LastString == nil {
+	if lastString == nil {
 		return 0
 	}
 
-	C.free(unsafe.Pointer(LastString))
-	LastString = nil
+	C.free(unsafe.Pointer(lastString))
+	lastString = nil
 
 	return 1
 }

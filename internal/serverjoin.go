@@ -21,7 +21,7 @@ func IKtServerJoin(id PeerID, password string) error {
 		return err
 	}
 
-	err = cm.AddPeer(join.ServerID, join.ServerAddr)
+	err = cm.addPeer(join.ServerID, join.ServerAddr)
 	if err != nil {
 		return err
 	}

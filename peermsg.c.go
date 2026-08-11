@@ -19,7 +19,7 @@ import "C"
 func KtPeerMsgSend(id C.uint32_t, msg *C.char, msgLen C.int) C.bool {
 	err := IKtPeerMsgSend(PeerID(id), C.GoBytes(unsafe.Pointer(msg), msgLen))
 	if err != nil {
-		LastError = err
+		lastError = err
 		return false
 	}
 
@@ -30,13 +30,13 @@ func KtPeerMsgSend(id C.uint32_t, msg *C.char, msgLen C.int) C.bool {
 func GMS_KtPeerMsgSend(id C.double, msg *C.char) C.double {
 	msgBytes, err := base64.StdEncoding.DecodeString(C.GoString(msg))
 	if err != nil {
-		LastError = err
+		lastError = err
 		return 0
 	}
 
 	err = IKtPeerMsgSend(PeerID(id), msgBytes)
 	if err != nil {
-		LastError = err
+		lastError = err
 		return 0
 	}
 
@@ -47,7 +47,7 @@ func GMS_KtPeerMsgSend(id C.double, msg *C.char) C.double {
 func KtPeerMsgSendAll(msg *C.char, msgLen C.int) C.bool {
 	err := IKtPeerMsgSendAll(C.GoBytes(unsafe.Pointer(msg), msgLen))
 	if err != nil {
-		LastError = err
+		lastError = err
 		return false
 	}
 
@@ -58,13 +58,13 @@ func KtPeerMsgSendAll(msg *C.char, msgLen C.int) C.bool {
 func GMS_KtPeerMsgSendAll(msg *C.char) C.double {
 	msgBytes, err := base64.StdEncoding.DecodeString(C.GoString(msg))
 	if err != nil {
-		LastError = err
+		lastError = err
 		return 0
 	}
 
 	err = IKtPeerMsgSendAll(msgBytes)
 	if err != nil {
-		LastError = err
+		lastError = err
 		return 0
 	}
 
@@ -75,11 +75,11 @@ func GMS_KtPeerMsgSendAll(msg *C.char) C.double {
 func KtPeerMsgRecv(id C.uint32_t, blocking C.bool, dst *C.char, dstLen C.int) C.int {
 	s, err := IKtPeerMsgRecv(PeerID(id), blocking == true)
 	if err != nil {
-		LastError = err
+		lastError = err
 		return -1
 	}
 	if len(s) > int(dstLen) {
-		LastError = ErrBufferTooSmall
+		lastError = ErrBufferTooSmall
 		return -1
 	}
 	if len(s) > 0 {
@@ -93,12 +93,12 @@ func KtPeerMsgRecv(id C.uint32_t, blocking C.bool, dst *C.char, dstLen C.int) C.
 func GMS_KtPeerMsgRecv(id C.double, blocking C.double) *C.char {
 	s, err := IKtPeerMsgRecv(PeerID(id), blocking != 0)
 	if err != nil {
-		LastError = err
+		lastError = err
 		return nil
 	}
 
 	str := C.CString(base64.StdEncoding.EncodeToString(s))
-	LastString = str
+	lastString = str
 
 	return str
 }

@@ -12,7 +12,7 @@ var (
 )
 
 func IKtPeerMsgSend(id PeerID, msg []byte) error {
-	peer, err := cm.GetPeerByID(id)
+	peer, err := cm.getPeerByID(id)
 	if err != nil {
 		return err
 	}
@@ -20,7 +20,7 @@ func IKtPeerMsgSend(id PeerID, msg []byte) error {
 		return ErrPeerNotConnected
 	}
 
-	err = peer.Send(msg)
+	err = peer.send(msg)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func IKtPeerMsgSendAll(msg []byte) error {
 			continue
 		}
 
-		err := peer.Send(msg)
+		err := peer.send(msg)
 		if err != nil {
 			return err
 		}
@@ -44,7 +44,7 @@ func IKtPeerMsgSendAll(msg []byte) error {
 }
 
 func IKtPeerMsgRecv(id PeerID, blocking bool) ([]byte, error) {
-	peer, err := cm.GetPeerByID(id)
+	peer, err := cm.getPeerByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -52,5 +52,5 @@ func IKtPeerMsgRecv(id PeerID, blocking bool) ([]byte, error) {
 		return nil, ErrPeerNotConnected
 	}
 
-	return peer.Receive(blocking), nil
+	return peer.receive(blocking), nil
 }

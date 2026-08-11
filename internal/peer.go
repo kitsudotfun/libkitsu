@@ -51,7 +51,7 @@ type Peer struct {
 }
 
 // add a Peer to the ConnectionManager and connects to them
-func (cm *ConnectionManager) AddPeer(id PeerID, addr netip.AddrPort) error {
+func (cm *ConnectionManager) addPeer(id PeerID, addr netip.AddrPort) error {
 	for _, peer := range cm.peers {
 		if peer.ID != id {
 			continue
@@ -65,7 +65,7 @@ func (cm *ConnectionManager) AddPeer(id PeerID, addr netip.AddrPort) error {
 	// add to peers so AddPeerMessage can write into its inbox
 	cm.peers = append(cm.peers, &peer)
 
-	err := peer.Connect()
+	err := peer.connect()
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (cm *ConnectionManager) AddPeer(id PeerID, addr netip.AddrPort) error {
 	return nil
 }
 
-func (cm *ConnectionManager) DeletePeer(id PeerID) error {
+func (cm *ConnectionManager) deletePeer(id PeerID) error {
 	var buf bytes.Buffer
 	buf.WriteString(PeerMagic)
 	buf.WriteByte(PeerDisconnect)
@@ -87,7 +87,7 @@ func (cm *ConnectionManager) DeletePeer(id PeerID) error {
 
 		close(peer.inbox)
 
-		err := peer.Send(buf.Bytes())
+		err := peer.send(buf.Bytes())
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func (cm *ConnectionManager) DeletePeer(id PeerID) error {
 	return ErrPeerUnknown
 }
 
-func (cm *ConnectionManager) GetPeerByID(id PeerID) (*Peer, error) {
+func (cm *ConnectionManager) getPeerByID(id PeerID) (*Peer, error) {
 	for _, peer := range cm.peers {
 		if peer.ID != id {
 			continue
@@ -110,7 +110,7 @@ func (cm *ConnectionManager) GetPeerByID(id PeerID) (*Peer, error) {
 	return nil, ErrPeerUnknown
 }
 
-func (cm *ConnectionManager) GetPeerByAddr(addr netip.AddrPort) (*Peer, error) {
+func (cm *ConnectionManager) getPeerByAddr(addr netip.AddrPort) (*Peer, error) {
 	for _, peer := range cm.peers {
 		if peer.addr != addr {
 			continue
@@ -122,7 +122,7 @@ func (cm *ConnectionManager) GetPeerByAddr(addr netip.AddrPort) (*Peer, error) {
 	return nil, ErrPeerUnknown
 }
 
-func (p *Peer) AddMessage(msg []byte) {
+func (p *Peer) addMessage(msg []byte) {
 	select {
 	case p.inbox <- msg:
 	default:
@@ -132,7 +132,7 @@ func (p *Peer) AddMessage(msg []byte) {
 }
 
 // establish a p2p connection to the Peer
-func (p *Peer) Connect() error {
+func (p *Peer) connect() error {
 	if p.State != Uncontacted {
 		return ErrPeerAlreadyConnecting
 	}
@@ -145,7 +145,7 @@ func (p *Peer) Connect() error {
 		var buf bytes.Buffer
 		buf.WriteString(PeerMagic)
 		buf.WriteByte(packetType)
-		err := p.Send(buf.Bytes())
+		err := p.send(buf.Bytes())
 		if err != nil {
 			return err
 		}
@@ -191,30 +191,26 @@ func (p *Peer) Connect() error {
 		}
 	}
 
-	go p.KeepAliveSender()
+	go p.keepAliveLoop()
 
 	return nil
 }
 
-// like ConnectionManager KeepAliveSender but for the Peer connection
-func (p *Peer) KeepAliveSender() {
-	ticker := time.NewTicker(time.Second * 30)
-
+// like ConnectionManager keepAliveLoop but for the Peer connection
+func (p *Peer) keepAliveLoop() {
 	var buf bytes.Buffer
 	buf.WriteString(PeerMagic)
 	buf.WriteByte(PeerKeepAlive)
 
-	for {
-		<-ticker.C
-
-		err := p.Send(buf.Bytes())
+	for range time.NewTicker(time.Second * 30).C {
+		err := p.send(buf.Bytes())
 		if err != nil {
 			break
 		}
 	}
 }
 
-func (p *Peer) Send(b []byte) error {
+func (p *Peer) send(b []byte) error {
 	_, err := p.cm.conn.WriteToUDPAddrPort(b, p.addr)
 	if err != nil {
 		return err
@@ -223,7 +219,7 @@ func (p *Peer) Send(b []byte) error {
 	return nil
 }
 
-func (p *Peer) Receive(blocking bool) []byte {
+func (p *Peer) receive(blocking bool) []byte {
 	if blocking {
 		return <-p.inbox
 	}
@@ -238,7 +234,7 @@ func (p *Peer) Receive(blocking bool) []byte {
 }
 
 func IKtPeerDisconnect(id PeerID) error {
-	err := cm.DeletePeer(id)
+	err := cm.deletePeer(id)
 	if err != nil {
 		return err
 	}

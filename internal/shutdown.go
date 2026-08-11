@@ -5,7 +5,7 @@ func IKtShutdown() error {
 		return nil
 	}
 
-	err := cm.Shutdown()
+	err := cm.shutdown()
 	if err != nil {
 		return err
 	}

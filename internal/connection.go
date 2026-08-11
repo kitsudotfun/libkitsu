@@ -25,14 +25,14 @@ type ConnectionManager struct {
 	peers []*Peer
 }
 
-func (cm *ConnectionManager) Init() error {
+func (cm *ConnectionManager) init() error {
 	var err error
 	cm.conn, err = net.ListenUDP("udp4", nil)
 	if err != nil {
 		return err
 	}
 
-	go cm.Reader()
+	go cm.readLoop()
 
 	var discover DiscoverResponse
 	err = natnegCall(Discover, DiscoverRequest{Token: sessionToken}, &discover)
@@ -42,16 +42,16 @@ func (cm *ConnectionManager) Init() error {
 
 	attestToken = discover.Token
 
-	go cm.KeepAliveSender()
+	go cm.keepAliveLoop()
 
 	return nil
 }
 
-func (cm *ConnectionManager) Shutdown() error {
-	if ServerData == nil { // client
+func (cm *ConnectionManager) shutdown() error {
+	if serverData == nil { // client
 		// disconnect from peers (server) manually
 		for _, peer := range cm.peers {
-			err := cm.DeletePeer(peer.ID)
+			err := cm.deletePeer(peer.ID)
 			if err != nil {
 				return err
 			}
@@ -73,10 +73,8 @@ func (cm *ConnectionManager) Shutdown() error {
 	return nil
 }
 
-func (cm *ConnectionManager) KeepAliveSender() {
-	ticker := time.NewTicker(time.Second * 30)
-	for {
-		<-ticker.C
+func (cm *ConnectionManager) keepAliveLoop() {
+	for range time.NewTicker(time.Second * 30).C {
 		err := natnegCall(KeepAlive, KeepAliveRequest{}, &KeepAliveResponse{})
 		if err != nil {
 			break
@@ -84,7 +82,7 @@ func (cm *ConnectionManager) KeepAliveSender() {
 	}
 }
 
-func (cm *ConnectionManager) Reader() {
+func (cm *ConnectionManager) readLoop() {
 	buf := make([]byte, 1400)
 	for {
 		n, addr, err := cm.conn.ReadFromUDPAddrPort(buf)
@@ -92,64 +90,68 @@ func (cm *ConnectionManager) Reader() {
 			break
 		}
 
-		data := slices.Clone(buf[:n])
-
-		// NATNEG message
-		b, natneg := bytes.CutPrefix(data, []byte(NatnegMagic))
-		if natneg && addr == cm.natnegAddr && len(b) > 0 {
-			if b[0] == JoinNotify {
-				// TODO: handle error from this somehow
-				go cm.handleJoinNotify(b[1:])
-				continue
-			}
-
-			// this is a response that natnegCall is waiting on
-			cm.natnegInbox <- b
-			continue
-		}
-
-		// peer message
-		peer, err := cm.GetPeerByAddr(addr)
+		err = cm.handlePacket(addr, slices.Clone(buf[:n]))
 		if err != nil {
 			// TODO: log this
 			continue
 		}
+	}
+}
 
-		// check for internal message
-		b, internal := bytes.CutPrefix(data, []byte(PeerMagic))
-		if internal && len(b) > 0 {
-			switch b[0] {
-			case PeerKeepAlive:
-				peer.lastKeepAlive = time.Now()
-
-				var buf bytes.Buffer
-				buf.WriteString(PeerMagic)
-				buf.WriteByte(PeerKeepAliveAck)
-				err = peer.Send(buf.Bytes())
-				if err != nil {
-					// TODO: log this
-					continue
-				}
-
-				continue
-			case PeerKeepAliveAck:
-				// nothing to do
-				continue
-			case PeerDisconnect:
-				err = cm.DeletePeer(peer.ID)
-				if err != nil {
-					// TODO: log this
-					continue
-				}
-
-				continue
-			}
-
-			// other internal messages should be received by AddMessage
+func (cm *ConnectionManager) handlePacket(addr netip.AddrPort, data []byte) error {
+	// NATNEG message
+	b, natneg := bytes.CutPrefix(data, []byte(NatnegMagic))
+	if natneg && addr == cm.natnegAddr && len(b) > 0 {
+		if b[0] == JoinNotify {
+			// TODO: handle error from this somehow
+			go cm.handleJoinNotify(b[1:])
+			return nil
 		}
 
-		peer.AddMessage(data)
+		// this is a response that natnegCall is waiting on
+		cm.natnegInbox <- b
+		return nil
 	}
+
+	// peer message
+	peer, err := cm.getPeerByAddr(addr)
+	if err != nil {
+		return err
+	}
+
+	// check for internal message
+	b, internal := bytes.CutPrefix(data, []byte(PeerMagic))
+	if internal && len(b) > 0 {
+		switch b[0] {
+		case PeerKeepAlive:
+			peer.lastKeepAlive = time.Now()
+
+			var buf bytes.Buffer
+			buf.WriteString(PeerMagic)
+			buf.WriteByte(PeerKeepAliveAck)
+			err = peer.send(buf.Bytes())
+			if err != nil {
+				return err
+			}
+
+			return nil
+		case PeerKeepAliveAck:
+			// nothing to do
+			return nil
+		case PeerDisconnect:
+			err = cm.deletePeer(peer.ID)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+
+		// other internal messages should be received by AddMessage
+	}
+
+	peer.addMessage(data)
+	return nil
 }
 
 func (cm *ConnectionManager) handleJoinNotify(data []byte) error {
@@ -159,7 +161,7 @@ func (cm *ConnectionManager) handleJoinNotify(data []byte) error {
 		return err
 	}
 
-	err = cm.AddPeer(notify.ClientID, notify.ClientAddr)
+	err = cm.addPeer(notify.ClientID, notify.ClientAddr)
 	if err != nil {
 		return err
 	}

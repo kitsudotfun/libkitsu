@@ -42,12 +42,12 @@ func IKtInit(game string, key string) (PeerID, error) {
 	sessionToken = verify.Token
 
 	cm = ConnectionManager{natnegAddr: verify.NatNegAddr, natnegInbox: make(chan []byte)}
-	err = cm.Init()
+	err = cm.init()
 	if err != nil {
 		return 0, err
 	}
 
-	go HeartbeatSender()
+	go heartbeatLoop()
 
 	return verify.ID, nil
 }

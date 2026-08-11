@@ -2,25 +2,25 @@ package main
 
 import "C"
 
-var LastError error
+var lastError error
 
 //export KtGetLastError
 func KtGetLastError() *C.char {
-	if LastError == nil {
+	if lastError == nil {
 		return nil
 	}
 
-	return C.CString(LastError.Error())
+	return C.CString(lastError.Error())
 }
 
 //export GMS_KtGetLastError
 func GMS_KtGetLastError() *C.char {
-	if LastError == nil {
+	if lastError == nil {
 		return nil
 	}
 
-	str := C.CString(LastError.Error())
-	LastString = str
+	str := C.CString(lastError.Error())
+	lastString = str
 
 	return str
 }

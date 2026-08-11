@@ -37,7 +37,7 @@ func KtServerAnnounce(data *C.KtServerData) C.bool {
 		Data:       C.GoString(data.data),
 	})
 	if err != nil {
-		LastError = err
+		lastError = err
 		return false
 	}
 
@@ -49,13 +49,13 @@ func GMS_KtServerAnnounce(data *C.char) C.double {
 	var server Server
 	err := json.Unmarshal([]byte(C.GoString(data)), &server)
 	if err != nil {
-		LastError = err
+		lastError = err
 		return 0
 	}
 
 	err = IKtServerAnnounce(server)
 	if err != nil {
-		LastError = err
+		lastError = err
 		return 0
 	}
 
@@ -66,7 +66,7 @@ func GMS_KtServerAnnounce(data *C.char) C.double {
 func KtServerShutdown() C.bool {
 	err := IKtServerShutdown()
 	if err != nil {
-		LastError = err
+		lastError = err
 		return false
 	}
 
@@ -77,7 +77,7 @@ func KtServerShutdown() C.bool {
 func GMS_KtServerShutdown() C.double {
 	err := IKtServerShutdown()
 	if err != nil {
-		LastError = err
+		lastError = err
 		return 0
 	}
 
