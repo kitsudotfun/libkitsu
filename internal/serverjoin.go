@@ -5,7 +5,7 @@ import (
 	. "github.com/kitsudotfun/natneg/defs"
 )
 
-func IKtServerJoin(id SessionID, password string) error {
+func IKtServerJoin(id PeerID, password string) error {
 	var serverJoin ServerJoinResponse
 	err := apiCall("/server/join", sessionToken, ServerJoinRequest{
 		ServerID: id,

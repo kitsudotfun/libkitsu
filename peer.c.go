@@ -13,7 +13,7 @@ import "C"
 
 //export KtPeerDisconnect
 func KtPeerDisconnect(id C.uint32_t) C.bool {
-	err := IKtPeerDisconnect(SessionID(id))
+	err := IKtPeerDisconnect(PeerID(id))
 	if err != nil {
 		LastError = err
 		return false
@@ -24,7 +24,7 @@ func KtPeerDisconnect(id C.uint32_t) C.bool {
 
 //export GMS_KtPeerDisconnect
 func GMS_KtPeerDisconnect(id C.double) C.double {
-	err := IKtPeerDisconnect(SessionID(id))
+	err := IKtPeerDisconnect(PeerID(id))
 	if err != nil {
 		LastError = err
 		return 0

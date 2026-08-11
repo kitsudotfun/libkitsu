@@ -18,7 +18,7 @@ var (
 	attestToken  string
 )
 
-func IKtInit(game string, key string) (SessionID, error) {
+func IKtInit(game string, key string) (PeerID, error) {
 	var new SessionNewResponse
 	err := apiCall("/session/new", "", SessionNewRequest{GameID: game}, &new)
 	if err != nil {

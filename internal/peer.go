@@ -41,7 +41,7 @@ const (
 type Peer struct {
 	cm *ConnectionManager
 
-	ID    SessionID
+	ID    PeerID
 	State int
 
 	addr  netip.AddrPort
@@ -51,7 +51,7 @@ type Peer struct {
 }
 
 // add a Peer to the ConnectionManager and connects to them
-func (cm *ConnectionManager) AddPeer(id SessionID, addr netip.AddrPort) error {
+func (cm *ConnectionManager) AddPeer(id PeerID, addr netip.AddrPort) error {
 	for _, peer := range cm.peers {
 		if peer.ID != id {
 			continue
@@ -73,7 +73,7 @@ func (cm *ConnectionManager) AddPeer(id SessionID, addr netip.AddrPort) error {
 	return nil
 }
 
-func (cm *ConnectionManager) DeletePeer(id SessionID) error {
+func (cm *ConnectionManager) DeletePeer(id PeerID) error {
 	var buf bytes.Buffer
 	buf.WriteString(PeerMagic)
 	buf.WriteByte(PeerDisconnect)
@@ -98,7 +98,7 @@ func (cm *ConnectionManager) DeletePeer(id SessionID) error {
 	return ErrPeerUnknown
 }
 
-func (cm *ConnectionManager) GetPeerByID(id SessionID) (*Peer, error) {
+func (cm *ConnectionManager) GetPeerByID(id PeerID) (*Peer, error) {
 	for _, peer := range cm.peers {
 		if peer.ID != id {
 			continue
@@ -237,7 +237,7 @@ func (p *Peer) Receive(blocking bool) []byte {
 	return nil
 }
 
-func IKtPeerDisconnect(id SessionID) error {
+func IKtPeerDisconnect(id PeerID) error {
 	err := cm.DeletePeer(id)
 	if err != nil {
 		return err

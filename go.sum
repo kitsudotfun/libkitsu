@@ -1,6 +1,6 @@
 github.com/golang-jwt/jwt/v5 v5.3.1 h1:kYf81DTWFe7t+1VvL7eS+jKFVWaUnK9cB1qbwn63YCY=
 github.com/golang-jwt/jwt/v5 v5.3.1/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
-github.com/kitsudotfun/kyuubi v0.0.0-20260811023304-35c8a5ff5432 h1:lok9LitDp1dAnxdtRy0wr/jgulALum78O0H6ttbvHa8=
-github.com/kitsudotfun/kyuubi v0.0.0-20260811023304-35c8a5ff5432/go.mod h1:m5jV1WfxEC9W+0XsegWYEZOwqn8NX95DZMYsnwu6qkI=
-github.com/kitsudotfun/natneg v0.0.0-20260811023626-f37befb8ecaf h1:bMTVarVw82lISaZtqq3O5NNKesp0yDSpLPh3QlvJWFg=
-github.com/kitsudotfun/natneg v0.0.0-20260811023626-f37befb8ecaf/go.mod h1:srOeqirtqRaYiH7TYhCBtQ2460eaPRzo8CT4cxUUi94=
+github.com/kitsudotfun/kyuubi v0.0.0-20260811073802-933843243418 h1:yT1XhmKVfd2cbXwas0oMCYFQvGI4ovbX518gxEf5X+Y=
+github.com/kitsudotfun/kyuubi v0.0.0-20260811073802-933843243418/go.mod h1:m5jV1WfxEC9W+0XsegWYEZOwqn8NX95DZMYsnwu6qkI=
+github.com/kitsudotfun/natneg v0.0.0-20260811073934-00cb9d622388 h1:N2hzxKkuznBkNa4Q5MbbANoYfieXFVa6HAqyXC0ZqE0=
+github.com/kitsudotfun/natneg v0.0.0-20260811073934-00cb9d622388/go.mod h1:VoN32kLDANC1S3oCQYDtE0jgwhqh9L2L4tEJDgX1tq8=

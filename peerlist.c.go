@@ -56,8 +56,8 @@ func KtPeerList(count *C.int) *C.KtPeerListItem {
 //export GMS_KtPeerList
 func GMS_KtPeerList() *C.char {
 	type PeerInfo struct {
-		ID    SessionID `json:"id"`
-		State int       `json:"state"`
+		ID    PeerID `json:"id"`
+		State int    `json:"state"`
 	}
 
 	cm, err := GetCM()

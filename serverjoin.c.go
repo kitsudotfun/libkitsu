@@ -13,7 +13,7 @@ import "C"
 
 //export KtServerJoin
 func KtServerJoin(id C.uint32_t, password *C.char) C.bool {
-	err := IKtServerJoin(SessionID(id), C.GoString(password))
+	err := IKtServerJoin(PeerID(id), C.GoString(password))
 	if err != nil {
 		LastError = err
 		return false
@@ -24,7 +24,7 @@ func KtServerJoin(id C.uint32_t, password *C.char) C.bool {
 
 //export GMS_KtServerJoin
 func GMS_KtServerJoin(id C.double, password *C.char) C.double {
-	err := IKtServerJoin(SessionID(id), C.GoString(password))
+	err := IKtServerJoin(PeerID(id), C.GoString(password))
 	if err != nil {
 		LastError = err
 		return 0
