@@ -11,14 +11,8 @@ var (
 	ErrPeerNotConnected = errors.New("peer not connected")
 )
 
-func IKtPeerMsgSend(id string, msg []byte) error {
-	var sid SessionID
-	err := sid.FromString(id)
-	if err != nil {
-		return err
-	}
-
-	peer, err := cm.GetPeerByID(sid)
+func IKtPeerMsgSend(id SessionID, msg []byte) error {
+	peer, err := cm.GetPeerByID(id)
 	if err != nil {
 		return err
 	}
@@ -49,14 +43,8 @@ func IKtPeerMsgSendAll(msg []byte) error {
 	return nil
 }
 
-func IKtPeerMsgRecv(id string, blocking bool) ([]byte, error) {
-	var sid SessionID
-	err := sid.FromString(id)
-	if err != nil {
-		return nil, err
-	}
-
-	peer, err := cm.GetPeerByID(sid)
+func IKtPeerMsgRecv(id SessionID, blocking bool) ([]byte, error) {
+	peer, err := cm.GetPeerByID(id)
 	if err != nil {
 		return nil, err
 	}

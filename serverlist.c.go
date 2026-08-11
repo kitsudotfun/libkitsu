@@ -13,7 +13,7 @@ import (
 #include <stdbool.h>
 
 typedef struct {
-    const char *id;
+	uint32_t id;
     const char *name;
 
 	bool password;
@@ -48,7 +48,7 @@ func KtServerList(count *C.int) *C.KtServerListItem {
 
 	servers := unsafe.Slice((*C.KtServerListItem)(ptr), len(list))
 	for i, server := range list {
-		servers[i].id = C.CString(server.ID.String())
+		servers[i].id = C.uint32_t(server.ID)
 		servers[i].name = C.CString(server.Name)
 
 		servers[i].password = server.Password != ""
@@ -93,7 +93,6 @@ func KtServerListFree(ptr *C.KtServerListItem, count C.int) {
 
 	servers := unsafe.Slice(ptr, int(count))
 	for i := range servers {
-		C.free(unsafe.Pointer(servers[i].id))
 		C.free(unsafe.Pointer(servers[i].name))
 		C.free(unsafe.Pointer(servers[i].data))
 	}

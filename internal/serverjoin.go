@@ -5,13 +5,10 @@ import (
 	. "github.com/kitsudotfun/natneg/defs"
 )
 
-func IKtServerJoin(id string, password string) error {
-	var sid SessionID
-	sid.FromString(id)
-
+func IKtServerJoin(id SessionID, password string) error {
 	var serverJoin ServerJoinResponse
 	err := apiCall("/server/join", sessionToken, ServerJoinRequest{
-		ServerID: sid,
+		ServerID: id,
 		Password: password,
 	}, &serverJoin)
 	if err != nil {

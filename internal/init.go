@@ -22,12 +22,12 @@ func IKtInit(game string, key string) (SessionID, error) {
 	var new SessionNewResponse
 	err := apiCall("/session/new", "", SessionNewRequest{GameID: game}, &new)
 	if err != nil {
-		return SessionID{}, err
+		return 0, err
 	}
 
 	proofKey, err := base64.StdEncoding.DecodeString(key)
 	if err != nil {
-		return SessionID{}, err
+		return 0, err
 	}
 
 	var verify SessionVerifyResponse
@@ -36,7 +36,7 @@ func IKtInit(game string, key string) (SessionID, error) {
 		Proof: getProofSolution(proofKey, new.Salt[:], new.Difficulty),
 	}, &verify)
 	if err != nil {
-		return SessionID{}, err
+		return 0, err
 	}
 
 	sessionToken = verify.Token
@@ -44,7 +44,7 @@ func IKtInit(game string, key string) (SessionID, error) {
 	cm = ConnectionManager{natnegAddr: verify.NatNegAddr, natnegInbox: make(chan []byte)}
 	err = cm.Init()
 	if err != nil {
-		return SessionID{}, err
+		return 0, err
 	}
 
 	go HeartbeatSender()

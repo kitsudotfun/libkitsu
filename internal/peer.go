@@ -234,14 +234,8 @@ func (p *Peer) Receive(blocking bool) []byte {
 	return nil
 }
 
-func IKtPeerDisconnect(id string) error {
-	var sid SessionID
-	err := sid.FromString(id)
-	if err != nil {
-		return err
-	}
-
-	err = cm.DeletePeer(sid)
+func IKtPeerDisconnect(id SessionID) error {
+	err := cm.DeletePeer(id)
 	if err != nil {
 		return err
 	}

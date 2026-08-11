@@ -14,7 +14,7 @@ import (
 #include <stdint.h>
 
 typedef struct {
-	const char *id;
+	uint32_t id;
 	uint8_t state;
 } KtPeerListItem;
 */
@@ -44,7 +44,7 @@ func KtPeerList(count *C.int) *C.KtPeerListItem {
 
 	list := unsafe.Slice((*C.KtPeerListItem)(ptr), len(peers))
 	for i, peer := range peers {
-		list[i].id = C.CString(peer.ID.String())
+		list[i].id = C.uint32_t(peer.ID)
 		list[i].state = C.uint8_t(peer.State)
 	}
 
@@ -77,18 +77,4 @@ func GMS_KtPeerList() *C.char {
 	LastString = str
 
 	return str
-}
-
-//export KtPeerListFree
-func KtPeerListFree(ptr *C.KtPeerListItem, count C.int) {
-	if ptr == nil {
-		return
-	}
-
-	servers := unsafe.Slice(ptr, int(count))
-	for i := range servers {
-		C.free(unsafe.Pointer(servers[i].id))
-	}
-
-	C.free(unsafe.Pointer(ptr))
 }
