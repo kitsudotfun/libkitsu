@@ -148,11 +148,7 @@ func (cm *ConnectionManager) Reader() {
 			// other internal messages should be received by AddMessage
 		}
 
-		err = peer.AddMessage(data)
-		if err != nil {
-			// TODO: log this
-			continue
-		}
+		peer.AddMessage(data)
 	}
 }
 

@@ -14,7 +14,6 @@ var (
 	ErrPeerUnknown           = errors.New("peer unknown")
 	ErrPeerExists            = errors.New("peer exists")
 	ErrPeerAlreadyConnecting = errors.New("peer already connecting")
-	ErrPeerInboxFull         = errors.New("peer inbox full")
 )
 
 const PeerMagic = "KTsu"
@@ -123,15 +122,13 @@ func (cm *ConnectionManager) GetPeerByAddr(addr netip.AddrPort) (*Peer, error) {
 	return nil, ErrPeerUnknown
 }
 
-func (p *Peer) AddMessage(msg []byte) error {
+func (p *Peer) AddMessage(msg []byte) {
 	select {
 	case p.inbox <- msg:
 	default:
-		return ErrPeerInboxFull
+		_ = <-p.inbox
+		p.inbox <- msg
 	}
-
-	p.inbox <- msg
-	return nil
 }
 
 // establish a p2p connection to the Peer
