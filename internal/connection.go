@@ -126,10 +126,7 @@ func (cm *ConnectionManager) handlePacket(addr netip.AddrPort, data []byte) erro
 		case PeerKeepAlive:
 			peer.lastKeepAlive = time.Now()
 
-			var buf bytes.Buffer
-			buf.WriteString(PeerMagic)
-			buf.WriteByte(PeerKeepAliveAck)
-			err = peer.send(buf.Bytes())
+			err = peer.send(append([]byte(PeerMagic), PeerKeepAliveAck))
 			if err != nil {
 				return err
 			}

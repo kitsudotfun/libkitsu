@@ -74,10 +74,7 @@ func (cm *ConnectionManager) addPeer(id PeerID, addr netip.AddrPort) error {
 }
 
 func (cm *ConnectionManager) deletePeer(id PeerID) error {
-	var buf bytes.Buffer
-	buf.WriteString(PeerMagic)
-	buf.WriteByte(PeerDisconnect)
-
+	msg := append([]byte(PeerMagic), PeerDisconnect)
 	for i, peer := range cm.peers {
 		if peer.ID != id {
 			continue
@@ -87,7 +84,7 @@ func (cm *ConnectionManager) deletePeer(id PeerID) error {
 
 		close(peer.inbox)
 
-		err := peer.send(buf.Bytes())
+		err := peer.send(msg)
 		if err != nil {
 			return err
 		}
@@ -142,10 +139,7 @@ func (p *Peer) connect() error {
 
 	var tries int
 	for {
-		var buf bytes.Buffer
-		buf.WriteString(PeerMagic)
-		buf.WriteByte(packetType)
-		err := p.send(buf.Bytes())
+		err := p.send(append([]byte(PeerMagic), packetType))
 		if err != nil {
 			return err
 		}
@@ -187,6 +181,7 @@ func (p *Peer) connect() error {
 			packetType = PeerConnectAck
 		case PeerConnectAck:
 			p.State = Connected
+			packetType = PeerConnectAck // just in case?
 			// continue so PeerConnectAck can be sent
 		}
 	}
@@ -198,12 +193,9 @@ func (p *Peer) connect() error {
 
 // like ConnectionManager keepAliveLoop but for the Peer connection
 func (p *Peer) keepAliveLoop() {
-	var buf bytes.Buffer
-	buf.WriteString(PeerMagic)
-	buf.WriteByte(PeerKeepAlive)
-
+	msg := append([]byte(PeerMagic), PeerKeepAlive)
 	for range time.NewTicker(time.Second * 30).C {
-		err := p.send(buf.Bytes())
+		err := p.send(msg)
 		if err != nil {
 			break
 		}
