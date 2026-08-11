@@ -141,8 +141,9 @@ func (p *Peer) Connect() error {
 	}
 
 	p.State = Connecting
-
 	packetType := PeerConnect
+
+	var tries int
 	for {
 		var buf bytes.Buffer
 		buf.WriteString(PeerMagic)
@@ -163,6 +164,11 @@ func (p *Peer) Connect() error {
 		select {
 		case data = <-p.inbox:
 		case <-timeout.C:
+			if tries >= 5 {
+				return ErrTimedOut
+			}
+
+			tries++
 			// do nothing, will be handled by prefix check
 		}
 
