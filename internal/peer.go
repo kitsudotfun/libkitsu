@@ -209,7 +209,7 @@ func (p *Peer) keepAliveLoop() {
 		}
 
 		// mark as timed out after a minute
-		if time.Since(p.lastKeepAlive) > time.Minute {
+		if !p.lastKeepAlive.IsZero() && time.Since(p.lastKeepAlive) > time.Minute {
 			p.State = TimedOut
 		}
 	}
