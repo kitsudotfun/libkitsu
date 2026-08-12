@@ -14,6 +14,7 @@ var (
 	ErrPeerUnknown           = errors.New("peer unknown")
 	ErrPeerExists            = errors.New("peer exists")
 	ErrPeerAlreadyConnecting = errors.New("peer already connecting")
+	ErrPeerConnectFailed     = errors.New("peer connection failed")
 )
 
 const PeerMagic = "KTsu"
@@ -59,13 +60,14 @@ func (cm *ConnectionManager) addPeer(id PeerID, addr netip.AddrPort) error {
 		return ErrPeerExists
 	}
 
-	peer := Peer{cm: cm, ID: id, addr: addr, inbox: make(chan []byte, 32)}
+	peer := Peer{cm: cm, ID: id, addr: addr, inbox: make(chan []byte, 32), lastKeepAlive: time.Now()}
 
 	// add to peers so AddPeerMessage can write into its inbox
 	cm.peers = append(cm.peers, &peer)
 
 	err := peer.connect()
 	if err != nil {
+		cm.deletePeer(peer.ID)
 		return err
 	}
 
@@ -136,8 +138,7 @@ func (p *Peer) connect() error {
 	p.State = Connecting
 	packetType := PeerConnect
 
-	var tries int
-	for {
+	for attempt := 0; attempt <= 5 && p.State != Connected; {
 		err := p.send(append([]byte(PeerMagic), packetType))
 		if err != nil {
 			return err
@@ -145,44 +146,35 @@ func (p *Peer) connect() error {
 
 		timeout := time.NewTimer(time.Second)
 
-		if p.State == Connected {
-			// PeerConnectAck sent, break now
-			break
-		}
-
 		var data []byte
 		select {
 		case data = <-p.inbox:
 		case <-timeout.C:
-			if tries >= 5 {
-				return ErrTimedOut
-			}
-
-			tries++
 			// do nothing, will be handled by prefix check
 		}
 
 		var found bool
 		data, found = bytes.CutPrefix(data, []byte(PeerMagic))
-		if !found {
-			// unexpected
+		if !found || len(data) < 1 {
+			attempt++
 			continue
 		}
 
-		if len(data) < 1 {
-			// unexpected
-			continue
+		switch p.State {
+		case Connecting:
+			if data[0] == PeerConnect || data[0] == PeerConnectAck {
+				p.State = ConnectingAck
+				packetType = PeerConnectAck
+				continue
+			}
+		case ConnectingAck:
+			if data[0] == PeerConnectAck {
+				p.State = Connected
+			}
 		}
-
-		switch data[0] {
-		case PeerConnect:
-			p.State = ConnectingAck
-			packetType = PeerConnectAck
-		case PeerConnectAck:
-			p.State = Connected
-			packetType = PeerConnectAck // just in case?
-			// continue so PeerConnectAck can be sent
-		}
+	}
+	if p.State != Connected {
+		return ErrPeerConnectFailed
 	}
 
 	go p.keepAliveLoop()
