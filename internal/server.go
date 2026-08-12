@@ -57,7 +57,7 @@ func sendHeartbeat() error {
 		return err
 	}
 
-	serverData.Players = len(cm.GetPeers())
+	serverData.Players = len(cm.GetPeers()) + 1
 
 	err = apiCall("/server/heartbeat", sessionToken, ServerHeartbeatRequest{
 		Server: *serverData,
