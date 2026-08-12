@@ -138,7 +138,7 @@ func (p *Peer) connect() error {
 	p.State = Connecting
 	packetType := PeerConnect
 
-	for attempt := 0; attempt <= 5 && p.State != Connected; {
+	for attempt := 0; attempt < 5 && p.State != Connected; {
 		err := p.send(append([]byte(PeerMagic), packetType))
 		if err != nil {
 			return err
