@@ -35,7 +35,6 @@ const (
 	Connecting
 	ConnectingAck
 	Connected
-	TimedOut // TODO: return this at some point
 )
 
 type Peer struct {
@@ -200,9 +199,12 @@ func (p *Peer) keepAliveLoop() {
 			break
 		}
 
-		// mark as timed out after a minute
+		// treat as timed out after a minute
 		if !p.lastKeepAlive.IsZero() && time.Since(p.lastKeepAlive) > time.Minute {
-			p.State = TimedOut
+			err = p.cm.deletePeer(p.ID)
+			if err != nil {
+				// TODO: log this
+			}
 		}
 	}
 }
