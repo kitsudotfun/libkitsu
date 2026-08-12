@@ -52,7 +52,14 @@ func sendHeartbeat() error {
 		return nil
 	}
 
-	err := apiCall("/server/heartbeat", sessionToken, ServerHeartbeatRequest{
+	cm, err := GetCM()
+	if err != nil {
+		return err
+	}
+
+	serverData.Players = len(cm.GetPeers())
+
+	err = apiCall("/server/heartbeat", sessionToken, ServerHeartbeatRequest{
 		Server: *serverData,
 		Token:  attestToken,
 	}, &ServerHeartbeatResponse{})
