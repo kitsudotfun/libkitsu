@@ -119,13 +119,13 @@ func (cm *ConnectionManager) handlePacket(addr netip.AddrPort, data []byte) erro
 		return err
 	}
 
+	peer.lastPacket = time.Now()
+
 	// check for internal message
 	b, internal := bytes.CutPrefix(data, []byte(PeerMagic))
 	if internal && len(b) > 0 {
 		switch b[0] {
 		case PeerKeepAlive:
-			peer.lastKeepAlive = time.Now()
-
 			err = peer.send(append([]byte(PeerMagic), PeerKeepAliveAck))
 			if err != nil {
 				return err

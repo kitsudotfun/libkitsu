@@ -47,7 +47,7 @@ type Peer struct {
 	addr  netip.AddrPort
 	inbox chan []byte
 
-	lastKeepAlive time.Time
+	lastPacket time.Time
 }
 
 // add a Peer to the ConnectionManager and connects to them
@@ -60,7 +60,7 @@ func (cm *ConnectionManager) addPeer(id PeerID, addr netip.AddrPort) error {
 		return ErrPeerExists
 	}
 
-	peer := Peer{cm: cm, ID: id, addr: addr, inbox: make(chan []byte, 32), lastKeepAlive: time.Now()}
+	peer := Peer{cm: cm, ID: id, addr: addr, inbox: make(chan []byte, 32), lastPacket: time.Now()}
 
 	// add to peers so AddPeerMessage can write into its inbox
 	cm.peers = append(cm.peers, &peer)
@@ -191,8 +191,7 @@ func (p *Peer) keepAliveLoop() {
 			break
 		}
 
-		// treat as timed out after a minute
-		if !p.lastKeepAlive.IsZero() && time.Since(p.lastKeepAlive) > time.Minute {
+		if !p.lastPacket.IsZero() && time.Since(p.lastPacket) > time.Minute {
 			err = p.cm.deletePeer(p.ID)
 			if err != nil {
 				// TODO: log this
