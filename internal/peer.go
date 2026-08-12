@@ -186,16 +186,18 @@ func (p *Peer) connect() error {
 func (p *Peer) keepAliveLoop() {
 	msg := append([]byte(PeerMagic), PeerKeepAlive)
 	for range time.NewTicker(time.Second * 30).C {
-		err := p.send(msg)
-		if err != nil {
-			break
-		}
-
 		if !p.lastPacket.IsZero() && time.Since(p.lastPacket) > time.Minute {
-			err = p.cm.deletePeer(p.ID)
+			err := p.cm.deletePeer(p.ID)
 			if err != nil {
 				// TODO: log this
 			}
+
+			break
+		}
+
+		err := p.send(msg)
+		if err != nil {
+			break
 		}
 	}
 }
