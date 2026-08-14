@@ -100,7 +100,7 @@ func (cm *ConnectionManager) readLoop() {
 
 func (cm *ConnectionManager) handlePacket(addr netip.AddrPort, data []byte) error {
 	// NATNEG message
-	b, natneg := bytes.CutPrefix(data, []byte(NatnegMagic))
+	b, natneg := bytes.CutPrefix(data, []byte(PeerMagic))
 	if natneg && addr == cm.natnegAddr && len(b) > 0 {
 		if b[0] == JoinNotify {
 			// TODO: handle error from this somehow

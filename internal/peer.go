@@ -8,6 +8,7 @@ import (
 	"time"
 
 	. "github.com/kitsudotfun/kyuubi/api/defs"
+	. "github.com/kitsudotfun/natneg/defs"
 )
 
 var (
@@ -16,8 +17,6 @@ var (
 	ErrPeerAlreadyConnecting = errors.New("peer already connecting")
 	ErrPeerConnectFailed     = errors.New("peer connection failed")
 )
-
-const PeerMagic = "KTsu"
 
 // peer packet types
 const (

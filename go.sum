@@ -2,5 +2,5 @@ github.com/golang-jwt/jwt/v5 v5.3.1 h1:kYf81DTWFe7t+1VvL7eS+jKFVWaUnK9cB1qbwn63Y
 github.com/golang-jwt/jwt/v5 v5.3.1/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/kitsudotfun/kyuubi v0.0.0-20260811073802-933843243418 h1:yT1XhmKVfd2cbXwas0oMCYFQvGI4ovbX518gxEf5X+Y=
 github.com/kitsudotfun/kyuubi v0.0.0-20260811073802-933843243418/go.mod h1:m5jV1WfxEC9W+0XsegWYEZOwqn8NX95DZMYsnwu6qkI=
-github.com/kitsudotfun/natneg v0.0.0-20260811073934-00cb9d622388 h1:N2hzxKkuznBkNa4Q5MbbANoYfieXFVa6HAqyXC0ZqE0=
-github.com/kitsudotfun/natneg v0.0.0-20260811073934-00cb9d622388/go.mod h1:VoN32kLDANC1S3oCQYDtE0jgwhqh9L2L4tEJDgX1tq8=
+github.com/kitsudotfun/natneg v0.0.0-20260814021949-7ce774e7e6c8 h1:AAwLvWjr8ZuCxj/V1ofokBg+r9EWJmfmjEskip0yVw4=
+github.com/kitsudotfun/natneg v0.0.0-20260814021949-7ce774e7e6c8/go.mod h1:VoN32kLDANC1S3oCQYDtE0jgwhqh9L2L4tEJDgX1tq8=
