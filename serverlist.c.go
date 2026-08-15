@@ -73,9 +73,6 @@ func GMS_KtServerList() *C.char {
 		lastError = err
 		return nil
 	}
-	if len(list) == 0 {
-		return nil
-	}
 
 	b, _ := json.Marshal(list)
 
