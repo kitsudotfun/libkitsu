@@ -19,10 +19,8 @@ var (
 type ConnectionManager struct {
 	conn *net.UDPConn
 
-	natnegAddr  netip.AddrPort
-	natnegInbox chan []byte
-
-	peers []*Peer
+	natneg Peer // TODO: add to peers eventually?
+	peers  []*Peer
 }
 
 func (cm *ConnectionManager) init() error {
@@ -68,7 +66,7 @@ func (cm *ConnectionManager) shutdown() error {
 		return err
 	}
 
-	close(cm.natnegInbox)
+	close(cm.natneg.inbox)
 
 	return nil
 }
@@ -99,9 +97,13 @@ func (cm *ConnectionManager) readLoop() {
 }
 
 func (cm *ConnectionManager) handlePacket(addr netip.AddrPort, data []byte) error {
-	// NATNEG message
-	b, natneg := bytes.CutPrefix(data, []byte(PeerMagic))
-	if natneg && addr == cm.natnegAddr && len(b) > 0 {
+	b, internal := bytes.CutPrefix(data, []byte(PeerMagic))
+	if len(b) < 1 {
+		return nil
+	}
+
+	// internal NATNEG message
+	if internal && addr == cm.natneg.addr {
 		if b[0] == JoinNotify {
 			// TODO: handle error from this somehow
 			go cm.handleJoinNotify(b[1:])
@@ -109,7 +111,7 @@ func (cm *ConnectionManager) handlePacket(addr netip.AddrPort, data []byte) erro
 		}
 
 		// this is a response that natnegCall is waiting on
-		cm.natnegInbox <- b
+		cm.natneg.addMessage(b)
 		return nil
 	}
 
@@ -121,9 +123,8 @@ func (cm *ConnectionManager) handlePacket(addr netip.AddrPort, data []byte) erro
 
 	peer.lastPacket = time.Now()
 
-	// check for internal message
-	b, internal := bytes.CutPrefix(data, []byte(PeerMagic))
-	if internal && len(b) > 0 {
+	// internal peer message
+	if internal {
 		switch b[0] {
 		case PeerKeepAlive:
 			err = peer.send(append([]byte(PeerMagic), PeerKeepAliveAck))

@@ -41,7 +41,7 @@ func IKtInit(game string, key string) (PeerID, error) {
 
 	sessionToken = verify.Token
 
-	cm = ConnectionManager{natnegAddr: verify.NatNegAddr, natnegInbox: make(chan []byte)}
+	cm = ConnectionManager{natneg: Peer{cm: &cm, addr: verify.NatNegAddr, inbox: make(chan []byte)}}
 	err = cm.init()
 	if err != nil {
 		return 0, err

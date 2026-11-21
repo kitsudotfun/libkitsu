@@ -15,7 +15,6 @@ import (
 	"runtime"
 	"slices"
 	"sync"
-	"time"
 
 	. "github.com/kitsudotfun/natneg/defs"
 )
@@ -76,19 +75,13 @@ func natnegCall[reqT any, resT any](packetType byte, req reqT, res *resT) error 
 		return err
 	}
 
-	_, err = cm.conn.WriteToUDPAddrPort(buf.Bytes(), cm.natnegAddr)
+	err = cm.natneg.send(buf.Bytes())
 	if err != nil {
 		return err
 	}
 
-	timeout := time.NewTimer(time.Second * 3)
-
-	var data []byte
-	select {
-	case data = <-cm.natnegInbox:
-	case <-timeout.C:
-		return ErrTimedOut
-	}
+	// TODO: handle timeout
+	data := cm.natneg.receive(true)
 
 	if data[0] != packetType {
 		return ErrUnexpectedResponse
